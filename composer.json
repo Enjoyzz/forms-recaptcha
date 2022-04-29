@@ -27,7 +27,7 @@
         "tests": "./vendor/bin/phpunit",
         "infection": [
             "Composer\\Config::disableProcessTimeout",
-            "XDEBUG_MODE=coverage ./vendor/bin/infection --threads=4 --logger-html='mutation-report.html'"
+            "XDEBUG_MODE=coverage ./vendor/bin/infection --threads=4"
         ],
         "phpcs": "./vendor/bin/phpcs --standard=PSR12 src",
         "phpcbf": "./vendor/bin/phpcbf --standard=PSR12 src"
