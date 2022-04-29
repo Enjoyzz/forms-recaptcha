@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Enjoys\Forms\Captcha\reCaptcha2;
 
-use Enjoys\Forms\Captcha\CaptchaBase;
-use Enjoys\Forms\Captcha\CaptchaInterface;
 use Enjoys\Forms\Element;
+use Enjoys\Forms\Interfaces\CaptchaInterface;
 use Enjoys\Forms\Interfaces\Ruleable;
 use Enjoys\Forms\Traits\Request;
 use Enjoys\Traits\Options;
