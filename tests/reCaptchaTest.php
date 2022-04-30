@@ -68,7 +68,10 @@ class reCaptchaTest extends TestCase
 
         $recaptcha = new reCaptcha2();
         $captcha = new Captcha($recaptcha);
-        $this->assertStringContainsString('<script src="https://www.google.com/recaptcha/api.js" async defer></script> <div class="g-recaptcha" data-sitekey="6LdUGNEZAAAAANA5cPI_pCmOqbq-6_srRkcGOwRy"></div>', $this->toOneString($captcha->renderHtml()));
+        $this->assertStringContainsString(
+            '<script src="https://www.google.com/recaptcha/api.js" async defer></script> <div class="g-recaptcha" data-sitekey="6LdUGNEZAAAAANA5cPI_pCmOqbq-6_srRkcGOwRy"></div>',
+            $this->toOneString($captcha->baseHtml())
+        );
     }
 
     public function testValidateSuccess()
@@ -131,7 +134,7 @@ class reCaptchaTest extends TestCase
 
 
         $captcha->validate();
-        $captcha->renderHtml();
+        $captcha->baseHtml();
         $this->assertEquals('The response parameter is missing., The secret parameter is invalid or malformed.', $captcha->getRuleErrorMessage());
     }
 
@@ -157,7 +160,7 @@ class reCaptchaTest extends TestCase
 
 
         $captcha->validate();
-        $captcha->renderHtml();
+        $captcha->baseHtml();
         $this->assertEquals('Параметр ответа отсутствует., Секретный параметр является недопустимым или искаженным.', $captcha->getRuleErrorMessage());
     }
 
@@ -183,7 +186,7 @@ class reCaptchaTest extends TestCase
 
 
         $captcha->validate();
-        $captcha->renderHtml();
+        $captcha->baseHtml();
         $this->assertEquals('Секретный параметр является недопустимым или искаженным.', $captcha->getRuleErrorMessage());
     }
 }
