@@ -17,18 +17,34 @@ class V2Invisible
     public function __invoke(): string
     {
         $form = $this->element->getForm();
-        $formId = $form->getAttribute('id')?->getValueString();
-        if ($formId === null) {
-            $formId = uniqid('form');
-            $form->setAttribute(AttributeFactory::create('id', $formId));
+
+        if (null === $formId = $form->getAttribute('id')?->getValueString()) {
+            throw new \InvalidArgumentException('Set attribute form id');
         }
-        $submitElement = $form->getElement('sbmt');
-        $submitElement->addAttributes(AttributeFactory::createFromArray([
-            'class' => 'g-recaptcha',
-            'data-sitekey' => $this->reCaptcha->getPublicKey(),
-            'data-action' => 'submit',
-            'data-callback' => 'onSubmit',
-        ]));
+
+
+        $submitElement = $form->getElement($this->reCaptcha->getOption('submitEl', 'submit'));
+
+
+        if ($submitElement === null) {
+            throw new \InvalidArgumentException('Set correctly submit element name. Option is `submitEl`');
+        }
+
+        if ($submitElement->getAttribute('id')->getValueString() === 'submit') {
+            throw new \InvalidArgumentException(
+                'The submit button ID should not be `submit`, please set a different id for the submit button'
+            );
+        }
+
+        $submitElement->addAttributes(
+            AttributeFactory::createFromArray([
+                'class' => 'g-recaptcha',
+                'data-sitekey' => $this->reCaptcha->getPublicKey(),
+                'data-action' => 'submit',
+                'data-callback' => 'onSubmit',
+            ])
+        );
+
         return sprintf(
             <<<HTML
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
