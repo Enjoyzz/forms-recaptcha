@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Enjoys\Forms\Captcha\reCaptcha;
 
+use Enjoys\Forms\Captcha\reCaptcha\Type\V2;
 use Enjoys\Forms\Element;
 use Enjoys\Forms\Interfaces\CaptchaInterface;
 use Enjoys\Forms\Interfaces\Ruleable;
@@ -19,9 +20,9 @@ class reCaptcha implements CaptchaInterface
     private const VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
     private string $privateKey = 'secret_key';
-    private string $publicKey  = 'site_key';
+    private string $publicKey = 'site_key';
 
-    private string $type = 'checkbox';
+    private string $type = V2::class;
     private array $errorCodes = [
         'missing-input-secret' => 'The secret parameter is missing.',
         'invalid-input-secret' => 'The secret parameter is invalid or malformed.',
@@ -56,13 +57,7 @@ class reCaptcha implements CaptchaInterface
 
     public function renderHtml(Element $element): string
     {
-        return sprintf(
-            <<<HTML
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<div class="g-recaptcha" data-sitekey="%s"></div>
-HTML,
-            $this->getPublicKey()
-        );
+        return (new $this->type($this, $element))();
     }
 
     public function validate(Ruleable $element): bool
@@ -140,5 +135,17 @@ HTML,
     public function setPublicKey(string $publicKey): void
     {
         $this->publicKey = $publicKey;
+    }
+
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+
+    public function setType(string $type): void
+    {
+        $this->type = $type;
     }
 }
