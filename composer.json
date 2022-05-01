@@ -1,5 +1,5 @@
 {
-    "name": "enjoys/forms-recaptcha2",
+    "name": "enjoys/forms-recaptcha",
     "description": "Addon for enjoys/forms",
     "license": "MIT",
     "require": {
@@ -15,12 +15,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Enjoys\\Forms\\Captcha\\reCaptcha2\\": "src/"
+            "Enjoys\\Forms\\Captcha\\reCaptcha\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\Enjoys\\Forms\\Captcha\\reCaptcha2\\": "tests/"
+            "Tests\\Enjoys\\Forms\\Captcha\\reCaptcha\\": "tests/"
         }
     },
     "scripts": {

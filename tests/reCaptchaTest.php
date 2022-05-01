@@ -1,9 +1,8 @@
 <?php
 
-namespace Tests\Enjoys\Forms\Captcha\reCaptcha2;
+namespace Tests\Enjoys\Forms\Captcha\reCaptcha;
 
 use Enjoys\Forms\Captcha\reCaptcha\reCaptcha;
-use Enjoys\Forms\Captcha\reCaptcha2\reCaptcha2;
 use Enjoys\Forms\Elements\Captcha;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
@@ -49,7 +48,7 @@ class reCaptchaTest extends TestCase
 
     public function testInit()
     {
-        $recaptcha = new reCaptcha2();
+        $recaptcha = new reCaptcha();
         $captcha = new Captcha($recaptcha);
         $this->assertInstanceOf(Captcha::class, $captcha);
     }
@@ -57,7 +56,7 @@ class reCaptchaTest extends TestCase
     public function testAddRule()
     {
 
-        $recaptcha = new reCaptcha2();
+        $recaptcha = new reCaptcha();
         $captcha = new Captcha($recaptcha);
         $captcha->prepare();
         $this->assertCount(1, $captcha->getRules());
@@ -66,7 +65,7 @@ class reCaptchaTest extends TestCase
     public function testRender()
     {
 
-        $recaptcha = new reCaptcha2();
+        $recaptcha = new reCaptcha();
         $captcha = new Captcha($recaptcha);
         $this->assertStringContainsString(
             '<script src="https://www.google.com/recaptcha/api.js" async defer></script> <div class="g-recaptcha" data-sitekey="6LdUGNEZAAAAANA5cPI_pCmOqbq-6_srRkcGOwRy"></div>',
@@ -81,7 +80,7 @@ class reCaptchaTest extends TestCase
             'success' => true,
         ]);
 
-        $captcha = new reCaptcha2();
+        $captcha = new reCaptcha();
         $captcha->setOptions([
             'httpClient' => $this->getHttpClient('text/plain', $responseBody)
         ]);
@@ -101,7 +100,7 @@ class reCaptchaTest extends TestCase
                 0 => 'missing-input-response',
             ],
         ]);
-        $recaptcha = new reCaptcha2();
+        $recaptcha = new reCaptcha();
         $recaptcha->setOptions([
             'httpClient' => $this->getHttpClient('text/plain', $responseBody)
         ]);
@@ -125,7 +124,7 @@ class reCaptchaTest extends TestCase
                 1 => 'invalid-input-secret'
             ],
         ]);
-        $recaptcha = new reCaptcha2();
+        $recaptcha = new reCaptcha();
         $recaptcha->setOptions([
             'httpClient' => $this->getHttpClient('text/plain', $responseBody)
         ]);
@@ -140,7 +139,7 @@ class reCaptchaTest extends TestCase
 
     public function testValidateFalseRenderWidthSetLanguageViaOptions()
     {
-        $recaptcha = new reCaptcha2();
+        $recaptcha = new reCaptcha();
         $responseBody = \json_encode([
             'success' => false,
             'error-codes' =>
@@ -166,7 +165,7 @@ class reCaptchaTest extends TestCase
 
     public function testValidateFalseRenderWidthSetLanguageViaMethod()
     {
-        $recaptcha = new reCaptcha2();
+        $recaptcha = new reCaptcha();
         $responseBody = \json_encode([
             'success' => false,
             'error-codes' =>

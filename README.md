@@ -1,4 +1,4 @@
-# forms-recaptcha2
+# forms-recaptcha
 addon for enjoys/forms
 
 ## Run built-in server for view example

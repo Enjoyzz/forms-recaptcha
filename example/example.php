@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Enjoys\Forms\Captcha\reCaptcha2\reCaptcha2;
+use Enjoys\Forms\Captcha\reCaptcha\reCaptcha;
 use Enjoys\Forms\Form;
 use Enjoys\Forms\Renderer\Html\HtmlRenderer;
 
@@ -10,7 +10,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 
 $form = new Form();
-$captcha = new reCaptcha2();
+$captcha = new reCaptcha();
 $captcha->setOptions([
 
 ]);

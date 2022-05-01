@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Enjoys\Forms\Captcha\reCaptcha2;
+namespace Enjoys\Forms\Captcha\reCaptcha;
 
 use Enjoys\Forms\Element;
 use Enjoys\Forms\Interfaces\CaptchaInterface;
@@ -11,7 +11,7 @@ use Enjoys\Forms\Traits\Request;
 use Enjoys\Traits\Options;
 use GuzzleHttp\Client;
 
-class reCaptcha2 implements CaptchaInterface
+class reCaptcha implements CaptchaInterface
 {
     use Options;
     use Request;
