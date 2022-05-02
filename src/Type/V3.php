@@ -8,15 +8,16 @@ namespace Enjoys\Forms\Captcha\reCaptcha\Type;
 
 use Enjoys\Forms\AttributeFactory;
 use Enjoys\Forms\Captcha\reCaptcha\reCaptcha;
+use Enjoys\Forms\Captcha\reCaptcha\TypeInterface;
 use Enjoys\Forms\Elements\Captcha;
 
-class V3
+class V3 implements TypeInterface
 {
-    public function __construct(private reCaptcha $reCaptcha, private Captcha $element)
+    public function __construct(private Captcha $element)
     {
     }
 
-    public function __invoke(): string
+    public function render(): string
     {
         $form = $this->element->getForm();
         $formId = $form->getAttribute('id')?->getValueString();
@@ -27,7 +28,7 @@ class V3
         $submitElement = $form->getElement('sbmt');
         $submitElement->addAttributes(AttributeFactory::createFromArray([
             'class' => 'g-recaptcha',
-            'data-sitekey' => $this->reCaptcha->getPublicKey(),
+            'data-sitekey' => $this->element->getCaptcha()->getPublicKey(),
             'data-action' => 'submit',
             'data-callback' => 'onSubmit',
         ]));

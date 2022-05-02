@@ -14,14 +14,19 @@ require __DIR__ . '/../vendor/autoload.php';
 try {
     $form = new Form();
     $form->addAttribute(AttributeFactory::create('id', 'form_id'));
+
+    $form->text('text');
+
     $captcha = new reCaptcha([
         'type' => V2Invisible::class ,
+//        'language' => 'ru',
         'submitEl' => 'submit1',
         'publicKey' => '6LdgYbYfAAAAAOb-So1MDXx1PSSshPGI8hnoKNV_',
         'privateKey' => '6LdgYbYfAAAAAJEUvegXGVR9NDmJNsOJqsXOA3vI',
     ]);
+
+
     $form->captcha($captcha);
-    $form->text('text');
     $form->submit('submit1');
     if ($form->isSubmitted()) {
         dump($_REQUEST);

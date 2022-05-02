@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Enjoys\Forms\Captcha\reCaptcha;
 
 use Enjoys\Forms\Captcha\reCaptcha\Type\V2;
+use Enjoys\Forms\Captcha\reCaptcha\Type\V2Invisible;
+use Enjoys\Forms\Captcha\reCaptcha\Type\V3;
 use Enjoys\Forms\Element;
 use Enjoys\Forms\Interfaces\CaptchaInterface;
 use Enjoys\Forms\Interfaces\Ruleable;
@@ -22,7 +24,11 @@ class reCaptcha implements CaptchaInterface
     private string $privateKey = 'secret_key';
     private string $publicKey = 'site_key';
 
+    /**
+     * @var class-string<TypeInterface>
+     */
     private string $type = V2::class;
+
     private array $errorCodes = [
         'missing-input-secret' => 'The secret parameter is missing.',
         'invalid-input-secret' => 'The secret parameter is invalid or malformed.',
@@ -34,6 +40,7 @@ class reCaptcha implements CaptchaInterface
 
     private ?string $ruleMessage = null;
 
+    private string $language = 'en';
 
     public function __construct(array $options = [])
     {
@@ -57,7 +64,7 @@ class reCaptcha implements CaptchaInterface
 
     public function renderHtml(Element $element): string
     {
-        return (new $this->type($this, $element))();
+        return (new $this->type($element))->render();
     }
 
     public function validate(Ruleable $element): bool
@@ -82,7 +89,7 @@ class reCaptcha implements CaptchaInterface
         if ($responseBody->success === false) {
             $errors = [];
             foreach ($responseBody->{'error-codes'} as $error) {
-                $errors[] = $this->errorCodes[$error];
+                $errors[] = $this->getErrorCode($error);
             }
             /** @psalm-suppress UndefinedMethod */
             $element->setRuleError(implode(', ', $errors));
@@ -98,11 +105,12 @@ class reCaptcha implements CaptchaInterface
      */
     public function setLanguage(string $lang): void
     {
-        $file_language = __DIR__ . '/lang/' . \strtolower($lang) . '.php';
+        $this->language = \strtolower($lang);
+    }
 
-        if (file_exists($file_language)) {
-            $this->errorCodes = include $file_language;
-        }
+    public function getLanguage(): string
+    {
+        return $this->language;
     }
 
     /**
@@ -148,4 +156,25 @@ class reCaptcha implements CaptchaInterface
     {
         $this->type = $type;
     }
+
+    /**
+     * @return string[]
+     */
+    public function getErrorCodes(): array
+    {
+        $file_language = __DIR__ . '/lang/' . $this->getLanguage() . '.php';
+
+        if (file_exists($file_language)) {
+            $this->errorCodes = include $file_language;
+        }
+        return $this->errorCodes;
+    }
+
+    public function getErrorCode(string $code): string
+    {
+        $errorCodes = $this->getErrorCodes();
+        return $errorCodes[$code] ?? '';
+    }
+
+
 }
