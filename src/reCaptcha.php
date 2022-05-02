@@ -175,6 +175,4 @@ class reCaptcha implements CaptchaInterface
         $errorCodes = $this->getErrorCodes();
         return $errorCodes[$code] ?? '';
     }
-
-
 }

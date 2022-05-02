@@ -2,13 +2,10 @@
 
 declare(strict_types=1);
 
-
 namespace Enjoys\Forms\Captcha\reCaptcha\Type;
-
 
 class V2 extends AbstractType
 {
-
     public function render(): string
     {
         return sprintf(

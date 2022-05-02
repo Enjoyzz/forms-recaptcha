@@ -63,5 +63,4 @@ HTML,
             return $value !== null;
         });
     }
-
 }

@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-
 namespace Enjoys\Forms\Captcha\reCaptcha\Type;
-
 
 class V3 extends V2Invisible
 {

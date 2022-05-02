@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-
 namespace Enjoys\Forms\Captcha\reCaptcha\Type;
-
 
 use Enjoys\Forms\Captcha\reCaptcha\TypeInterface;
 use Enjoys\Forms\Elements\Captcha;
