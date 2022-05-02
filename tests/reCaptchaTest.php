@@ -68,7 +68,7 @@ class reCaptchaTest extends TestCase
         $recaptcha = new reCaptcha();
         $captcha = new Captcha($recaptcha);
         $this->assertStringContainsString(
-            '<script src="https://www.google.com/recaptcha/api.js" async defer></script> <div class="g-recaptcha" data-sitekey="6LdUGNEZAAAAANA5cPI_pCmOqbq-6_srRkcGOwRy"></div>',
+            '<script src="https://www.google.com/recaptcha/api.js?hl=en" async defer></script> <div class="g-recaptcha" data-sitekey="site_key"></div>',
             $this->toOneString($captcha->baseHtml())
         );
     }
