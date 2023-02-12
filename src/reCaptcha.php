@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Enjoys\Forms\Captcha\reCaptcha;
 
 use Enjoys\Forms\Captcha\reCaptcha\Type\V2;
-use Enjoys\Forms\Captcha\reCaptcha\Type\V2Invisible;
-use Enjoys\Forms\Captcha\reCaptcha\Type\V3;
 use Enjoys\Forms\Element;
 use Enjoys\Forms\Interfaces\CaptchaInterface;
 use Enjoys\Forms\Interfaces\Ruleable;

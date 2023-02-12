@@ -3,8 +3,8 @@
     "description": "Addon for enjoys/forms",
     "license": "MIT",
     "require": {
-        "php": ">= 8.0",
-        "enjoys/forms": "^5.3",
+        "php": "^8.0",
+        "enjoys/forms": "^5.3 <5.5",
         "guzzlehttp/guzzle": "^7.1"
     },
     "require-dev": {
@@ -31,5 +31,11 @@
         ],
         "phpcs": "./vendor/bin/phpcs --standard=PSR12 src",
         "phpcbf": "./vendor/bin/phpcbf --standard=PSR12 src"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "infection/extension-installer": true
+        }
     }
 }
