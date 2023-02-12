@@ -71,10 +71,8 @@ class reCaptcha implements CaptchaInterface
 
         $data = [
             'secret' => $this->getPrivateKey(),
-            'response' => $this->getRequest()->getPostData(
-                'g-recaptcha-response',
-                $this->getRequest()->getQueryData('g-recaptcha-response')
-            )
+            'response' => $this->getRequest()->getParsedBody()['g-recaptcha-response']
+                ?? $this->getRequest()->getQueryParams()['g-recaptcha-response'] ?? null
         ];
 
         $response = $client->request('POST', self::VERIFY_URL, [
