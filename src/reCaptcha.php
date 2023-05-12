@@ -9,12 +9,10 @@ use Enjoys\Forms\Element;
 use Enjoys\Forms\Interfaces\CaptchaInterface;
 use Enjoys\Forms\Interfaces\Ruleable;
 use Enjoys\Forms\Traits\Request;
-use Enjoys\Traits\Options;
 use GuzzleHttp\Client;
 
 class reCaptcha implements CaptchaInterface
 {
-    use Options;
     use Request;
 
     private const VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
@@ -40,9 +38,59 @@ class reCaptcha implements CaptchaInterface
 
     private string $language = 'en';
 
+    /**
+     * @var array<string, mixed>
+     */
+    private array $options = [];
+
     public function __construct(array $options = [])
     {
         $this->setOptions($options);
+    }
+
+    public function setOption(string $key, mixed $value): self
+    {
+        $method = 'set' . ucfirst($key);
+        if (method_exists($this, $method)) {
+            $this->$method($value);
+            return $this;
+        }
+
+        $this->options[$key] = $value;
+        return $this;
+    }
+
+     public function getOption(string $key, mixed $defaults = null)
+    {
+        $method = 'get' . ucfirst($key);
+        if (method_exists($this, $method)) {
+            return $this->$method();
+        }
+
+        if (isset($this->options[$key])) {
+            return $this->options[$key];
+        }
+        return $defaults;
+    }
+
+    /**
+     * @param array<string, mixed> $options
+     * @return $this
+     */
+    public function setOptions(array $options = []): self
+    {
+        foreach ($options as $key => $value) {
+            $this->setOption($key, $value);
+        }
+        return $this;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
     }
 
     public function getName(): string
