@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Enjoys\Forms\Captcha\reCaptcha;
 
+use Enjoys\Forms\Captcha\reCaptcha\Language\En;
 use Enjoys\Forms\Captcha\reCaptcha\Type\V2;
 use Enjoys\Forms\Element;
 use Enjoys\Forms\Interfaces\CaptchaInterface;
 use Enjoys\Forms\Interfaces\Ruleable;
 use Enjoys\Forms\Traits\Request;
 use GuzzleHttp\Client;
+use ReflectionClass;
 
 class reCaptcha implements CaptchaInterface
 {
@@ -36,7 +38,7 @@ class reCaptcha implements CaptchaInterface
 
     private ?string $ruleMessage = null;
 
-    private string $language = 'en';
+    private ReCaptchaLanguageResponseInterface $language;
 
     /**
      * @var array<string, mixed>
@@ -46,6 +48,7 @@ class reCaptcha implements CaptchaInterface
     public function __construct(array $options = [])
     {
         $this->setOptions($options);
+        $this->language = new En();
     }
 
     public function setOption(string $key, mixed $value): self
@@ -60,7 +63,7 @@ class reCaptcha implements CaptchaInterface
         return $this;
     }
 
-     public function getOption(string $key, mixed $defaults = null)
+    public function getOption(string $key, mixed $defaults = null)
     {
         $method = 'get' . ucfirst($key);
         if (method_exists($this, $method)) {
@@ -149,10 +152,21 @@ class reCaptcha implements CaptchaInterface
      */
     public function setLanguage(string $lang): void
     {
-        $this->language = \strtolower($lang);
+        try {
+            $class = new ReflectionClass($lang);
+
+            if ($class->implementsInterface(ReCaptchaLanguageResponseInterface::class)) {
+                $this->language = new $lang();
+                return;
+            }
+        } catch (\ReflectionException) {
+            if (class_exists($languageClassString = '\\Enjoys\\Forms\\Captcha\\reCaptcha\\Language\\' . ucfirst($lang))) {
+                $this->language = new $languageClassString();
+            }
+        }
     }
 
-    public function getLanguage(): string
+    public function getLanguage(): ReCaptchaLanguageResponseInterface
     {
         return $this->language;
     }
@@ -201,22 +215,8 @@ class reCaptcha implements CaptchaInterface
         $this->type = $type;
     }
 
-    /**
-     * @return string[]
-     */
-    public function getErrorCodes(): array
-    {
-        $file_language = __DIR__ . '/lang/' . $this->getLanguage() . '.php';
-
-        if (file_exists($file_language)) {
-            $this->errorCodes = include $file_language;
-        }
-        return $this->errorCodes;
-    }
-
     public function getErrorCode(string $code): string
     {
-        $errorCodes = $this->getErrorCodes();
-        return $errorCodes[$code] ?? '';
+        return $this->getLanguage()->getErrorCode($code);
     }
 }
