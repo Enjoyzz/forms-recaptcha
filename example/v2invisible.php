@@ -17,13 +17,18 @@ try {
 
     $form->text('text');
 
-    $captcha = new reCaptcha([
-        'type' => V2Invisible::class ,
+    $captcha = new reCaptcha(
+        httpClient: new \GuzzleHttp\Client(),
+        requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
+        streamFactory: new \GuzzleHttp\Psr7\HttpFactory(),
+        options: [
+            'type' => V2Invisible::class,
 //        'language' => 'ru',
-        'submitEl' => 'submit1',
-        'publicKey' => '6LdgYbYfAAAAAOb-So1MDXx1PSSshPGI8hnoKNV_',
-        'privateKey' => '6LdgYbYfAAAAAJEUvegXGVR9NDmJNsOJqsXOA3vI',
-    ]);
+            'submitEl' => 'submit1',
+            'publicKey' => '6LdgYbYfAAAAAOb-So1MDXx1PSSshPGI8hnoKNV_',
+            'privateKey' => '6LdgYbYfAAAAAJEUvegXGVR9NDmJNsOJqsXOA3vI',
+        ]
+    );
 
 
     $form->captcha($captcha);
@@ -34,6 +39,6 @@ try {
     $renderer = new HtmlRenderer($form);
     echo include __DIR__ . '/.assets.php';
     echo sprintf('<div class="container-fluid">%s</div>', $renderer->output());
-} catch (Exception | Error $e) {
+} catch (Exception|Error $e) {
     echo 'Error: ' . $e->getMessage();
 }

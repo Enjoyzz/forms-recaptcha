@@ -10,8 +10,11 @@ use Enjoys\Forms\Element;
 use Enjoys\Forms\Interfaces\CaptchaInterface;
 use Enjoys\Forms\Interfaces\Ruleable;
 use Enjoys\Forms\Traits\Request;
-use GuzzleHttp\Client;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use ReflectionClass;
+use ReflectionException;
 
 class reCaptcha implements CaptchaInterface
 {
@@ -45,8 +48,12 @@ class reCaptcha implements CaptchaInterface
      */
     private array $options = [];
 
-    public function __construct(array $options = [])
-    {
+    public function __construct(
+        private ClientInterface $httpClient,
+        private RequestFactoryInterface $requestFactory,
+        private StreamFactoryInterface $streamFactory,
+        array $options = [],
+    ) {
         $this->setOptions($options);
         $this->language = new En();
     }
@@ -118,20 +125,24 @@ class reCaptcha implements CaptchaInterface
 
     public function validate(Ruleable $element): bool
     {
-        $client = $this->getOption('httpClient', $this->getGuzzleClient());
-
         $data = [
             'secret' => $this->getPrivateKey(),
             'response' => $this->getRequest()->getParsedBody()['g-recaptcha-response']
                 ?? $this->getRequest()->getQueryParams()['g-recaptcha-response'] ?? null
         ];
 
-        $response = $client->request('POST', self::VERIFY_URL, [
-            'form_params' => $data
-        ]);
+        $body = $this->streamFactory->createStream(
+            \http_build_query($data, '', '&')
+        );
+
+        $request = $this->requestFactory
+            ->createRequest('POST', self::VERIFY_URL)
+            ->withHeader('Content-Type', 'application/x-www-form-urlencoded')
+            ->withBody($body);
+
+        $response = $this->httpClient->sendRequest($request);
 
         $responseBody = \json_decode($response->getBody()->getContents());
-
 
         if ($responseBody->success === false) {
             $errors = [];
@@ -144,6 +155,7 @@ class reCaptcha implements CaptchaInterface
         }
         return true;
     }
+
 
     /**
      * Used across setOption()
@@ -159,8 +171,10 @@ class reCaptcha implements CaptchaInterface
                 $this->language = new $lang();
                 return;
             }
-        } catch (\ReflectionException) {
-            if (class_exists($languageClassString = '\\Enjoys\\Forms\\Captcha\\reCaptcha\\Language\\' . ucfirst($lang))) {
+        } catch (ReflectionException) {
+            if (class_exists(
+                $languageClassString = '\\Enjoys\\Forms\\Captcha\\reCaptcha\\Language\\' . ucfirst($lang)
+            )) {
                 $this->language = new $languageClassString();
             }
         }
@@ -169,15 +183,6 @@ class reCaptcha implements CaptchaInterface
     public function getLanguage(): ReCaptchaLanguageResponseInterface
     {
         return $this->language;
-    }
-
-    /**
-     *
-     * @return Client
-     */
-    private function getGuzzleClient(): Client
-    {
-        return new Client();
     }
 
 
@@ -219,4 +224,5 @@ class reCaptcha implements CaptchaInterface
     {
         return $this->getLanguage()->getErrorCode($code);
     }
+
 }

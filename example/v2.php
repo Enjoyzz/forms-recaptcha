@@ -10,13 +10,18 @@ require __DIR__ . '/../vendor/autoload.php';
 
 try {
     $form = new Form();
-    $captcha = new reCaptcha([
-        'publicKey' => '6LdUGNEZAAAAANA5cPI_pCmOqbq-6_srRkcGOwRy',
-        'privateKey' => '6LdUGNEZAAAAAPPz685RwftPySFeCLbV1xYJJjsk',
-        'language' => 'ru',
-       // 'data-size' => 'normal', // normal | compact
-      //  'data-theme' => 'dark' // light | dark
-    ]);
+    $captcha = new reCaptcha(
+        httpClient: new \GuzzleHttp\Client(),
+        requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
+        streamFactory: new \GuzzleHttp\Psr7\HttpFactory(),
+        options: [
+            'publicKey' => '6LdUGNEZAAAAANA5cPI_pCmOqbq-6_srRkcGOwRy',
+            'privateKey' => '6LdUGNEZAAAAAPPz685RwftPySFeCLbV1xYJJjsk',
+            'language' => 'ru'
+            // 'data-size' => 'normal', // normal | compact
+            //  'data-theme' => 'dark' // light | dark
+        ]
+    );
     $form->captcha($captcha);
     $form->submit('submit');
     if ($form->isSubmitted()) {
