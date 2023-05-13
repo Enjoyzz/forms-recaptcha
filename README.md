@@ -13,13 +13,16 @@ php -S localhost:8000 -t ./example .route
 // Optional. Set ID for form (for V2Invisible and V3) 
 $form->setAttribute(AttributeFactory::create('id', uniqid()));
 // Init reCaptcha
-$captcha = new reCaptcha([
+$captcha = new reCaptcha($Psr18_HttpClient, $Psr7RequestFactory, $Psr7StreamFactory);
+
+$captcha->setOptions([
     'type' => V3::class, //V2Invisible, V2, V3
     'publicKey' => '...',
     'privateKey' => '...',
     'submitEl' => 'submit1',
     // more options ...
 ]);
+
 $form->captcha($captcha);
 $form->submit('submit1');
 // more code...
