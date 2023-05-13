@@ -51,10 +51,8 @@ class reCaptcha implements CaptchaInterface
     public function __construct(
         private ClientInterface $httpClient,
         private RequestFactoryInterface $requestFactory,
-        private StreamFactoryInterface $streamFactory,
-        array $options = [],
+        private StreamFactoryInterface $streamFactory
     ) {
-        $this->setOptions($options);
         $this->language = new En();
     }
 

@@ -20,16 +20,16 @@ try {
     $captcha = new reCaptcha(
         httpClient: new \GuzzleHttp\Client(),
         requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
-        streamFactory: new \GuzzleHttp\Psr7\HttpFactory(),
-        options: [
-            'type' => V2Invisible::class,
-//        'language' => 'ru',
-            'submitEl' => 'submit1',
-            'publicKey' => '6LdgYbYfAAAAAOb-So1MDXx1PSSshPGI8hnoKNV_',
-            'privateKey' => '6LdgYbYfAAAAAJEUvegXGVR9NDmJNsOJqsXOA3vI',
-        ]
+        streamFactory: new \GuzzleHttp\Psr7\HttpFactory()
     );
 
+    $captcha->setOptions([
+        'type' => V2Invisible::class,
+//        'language' => 'ru',
+        'submitEl' => 'submit1',
+        'publicKey' => '6LdgYbYfAAAAAOb-So1MDXx1PSSshPGI8hnoKNV_',
+        'privateKey' => '6LdgYbYfAAAAAJEUvegXGVR9NDmJNsOJqsXOA3vI',
+    ]);
 
     $form->captcha($captcha);
     $form->submit('submit1');

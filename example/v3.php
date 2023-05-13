@@ -20,13 +20,13 @@ try {
         httpClient: new \GuzzleHttp\Client(),
         requestFactory: new \GuzzleHttp\Psr7\HttpFactory(),
         streamFactory: new \GuzzleHttp\Psr7\HttpFactory(),
-        options: [
-            'type' => V3::class,
-            'publicKey' => '6LcnkLYfAAAAAPFnJLrwnm_AaCX4ZhJ65iVElS1a',
-            'privateKey' => '6LcnkLYfAAAAAK5OiBeiFKwdcI156CaYt0bgo_AW',
-            'submitEl' => 'sbmt',
-        ]
     );
+    $captcha->setOptions([
+        'type' => V3::class,
+        'publicKey' => '6LcnkLYfAAAAAPFnJLrwnm_AaCX4ZhJ65iVElS1a',
+        'privateKey' => '6LcnkLYfAAAAAK5OiBeiFKwdcI156CaYt0bgo_AW',
+        'submitEl' => 'sbmt',
+    ]);
     $form->captcha($captcha);
 
     $form->submit('sbmt');
