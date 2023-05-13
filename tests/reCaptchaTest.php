@@ -4,11 +4,11 @@ namespace Tests\Enjoys\Forms\Captcha\reCaptcha;
 
 use Enjoys\Forms\Captcha\reCaptcha\reCaptcha;
 use Enjoys\Forms\Elements\Captcha;
-use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\HttpFactory;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Stream;
 use PHPUnit\Framework\TestCase;
-use Webmozart\Assert\Assert;
+use Psr\Http\Client\ClientInterface;
 
 class reCaptchaTest extends TestCase
 {
@@ -16,30 +16,34 @@ class reCaptchaTest extends TestCase
     {
         $extraHeaders['Content-Type'] = $contentType;
 
-        $response = $this->getMockBuilder(Response::class)->setMethods(['hasHeader', 'getHeader', 'getBody'])->getMock();
-        $response->expects($this->any())->method('hasHeader')->will($this->returnCallback(function ($headerName) use ($extraHeaders) {
-                    return \array_key_exists($headerName, $extraHeaders);
-        }));
-        $response->expects($this->any())->method('getHeader')->will($this->returnCallback(function ($headerName) use ($extraHeaders) {
-                    return [$extraHeaders[$headerName]];
-        }));
+        $response = $this->getMockBuilder(Response::class)->setMethods(['hasHeader', 'getHeader', 'getBody'])->getMock(
+        );
+        $response->expects($this->any())->method('hasHeader')->will(
+            $this->returnCallback(function ($headerName) use ($extraHeaders) {
+                return \array_key_exists($headerName, $extraHeaders);
+            })
+        );
+        $response->expects($this->any())->method('getHeader')->will(
+            $this->returnCallback(function ($headerName) use ($extraHeaders) {
+                return [$extraHeaders[$headerName]];
+            })
+        );
 
-        $stream = $this->getMockBuilder(Stream::class)->disableOriginalConstructor()->setMethods(['__toString', 'getContents'])->getMock();
+        $stream = $this->getMockBuilder(Stream::class)->disableOriginalConstructor()->setMethods(
+            ['__toString', 'getContents']
+        )->getMock();
         $stream->expects($this->any())->method('__toString')->willReturn($responseBody);
         $response->expects($this->any())->method('getBody')->willReturn($stream);
         $stream->expects($this->any())->method('getContents')->willReturn($responseBody);
 
-        $http = $this->getMockBuilder(Client::class)->setMethods(['request'])->getMock();
-        $http->expects($this->any())->method('request')->will($this->returnCallback(function ($method, $address, array $options) use ($response) {
-                    $this->lastRequestOptions = $options;
-                    Assert::keyExists($options, 'form_params');
-                    Assert::allKeyExists($options, 'response');
-                    Assert::allKeyExists($options, 'secret');
-                    return $response;
-        }));
+        $client = $this->createMock(ClientInterface::class);
+        $client->expects($this->any())->method('sendRequest')->willReturn(
+            $response
+        );
 
-        return $http;
+        return $client;
     }
+
 
     private function toOneString($multistring)
     {
@@ -48,15 +52,22 @@ class reCaptchaTest extends TestCase
 
     public function testInit()
     {
-        $recaptcha = new reCaptcha();
+        $recaptcha = new reCaptcha(
+            $this->getHttpClient('text/plain', ''),
+            new HttpFactory(),
+            new HttpFactory(),
+        );
         $captcha = new Captcha($recaptcha);
         $this->assertInstanceOf(Captcha::class, $captcha);
     }
 
     public function testAddRule()
     {
-
-        $recaptcha = new reCaptcha();
+        $recaptcha = new reCaptcha(
+            $this->getHttpClient('text/plain', ''),
+            new HttpFactory(),
+            new HttpFactory(),
+        );
         $captcha = new Captcha($recaptcha);
         $captcha->prepare();
         $this->assertCount(1, $captcha->getRules());
@@ -64,8 +75,11 @@ class reCaptchaTest extends TestCase
 
     public function testRender()
     {
-
-        $recaptcha = new reCaptcha();
+        $recaptcha = new reCaptcha(
+            $this->getHttpClient('text/plain', ''),
+            new HttpFactory(),
+            new HttpFactory(),
+        );
         $captcha = new Captcha($recaptcha);
         $this->assertStringContainsString(
             '<script src="https://www.google.com/recaptcha/api.js?hl=en" async defer></script> <div class="g-recaptcha" data-sitekey="site_key"></div>',
@@ -75,15 +89,16 @@ class reCaptchaTest extends TestCase
 
     public function testValidateSuccess()
     {
-
         $responseBody = \json_encode([
             'success' => true,
         ]);
 
-        $captcha = new reCaptcha();
-        $captcha->setOptions([
-            'httpClient' => $this->getHttpClient('text/plain', $responseBody)
-        ]);
+        $captcha = new reCaptcha(
+            $this->getHttpClient('text/plain', $responseBody),
+            new HttpFactory(),
+            new HttpFactory(),
+        );
+
 
         $captcha_element = new Captcha($captcha);
         $captcha_element->prepare();
@@ -96,14 +111,15 @@ class reCaptchaTest extends TestCase
         $responseBody = \json_encode([
             'success' => false,
             'error-codes' =>
-            [
-                0 => 'missing-input-response',
-            ],
+                [
+                    0 => 'missing-input-response',
+                ],
         ]);
-        $recaptcha = new reCaptcha();
-        $recaptcha->setOptions([
-            'httpClient' => $this->getHttpClient('text/plain', $responseBody)
-        ]);
+        $recaptcha = new reCaptcha(
+            $this->getHttpClient('text/plain', $responseBody),
+            new HttpFactory(),
+            new HttpFactory(),
+        );
 
 
         $captcha = new Captcha($recaptcha);
@@ -115,42 +131,51 @@ class reCaptchaTest extends TestCase
 
     public function testValidateFalseRender()
     {
-
         $responseBody = \json_encode([
             'success' => false,
             'error-codes' =>
-            [
-                0 => 'missing-input-response',
-                1 => 'invalid-input-secret'
-            ],
+                [
+                    0 => 'missing-input-response',
+                    1 => 'invalid-input-secret'
+                ],
         ]);
-        $recaptcha = new reCaptcha();
-        $recaptcha->setOptions([
-            'httpClient' => $this->getHttpClient('text/plain', $responseBody)
-        ]);
+        $recaptcha = new reCaptcha(
+            $this->getHttpClient('text/plain', $responseBody),
+            new HttpFactory(),
+            new HttpFactory(),
+        );
+
         $captcha = new Captcha($recaptcha);
         $captcha->prepare();
 
 
         $captcha->validate();
         $captcha->baseHtml();
-        $this->assertEquals('The response parameter is missing., The secret parameter is invalid or malformed.', $captcha->getRuleErrorMessage());
+        $this->assertEquals(
+            'The response parameter is missing., The secret parameter is invalid or malformed.',
+            $captcha->getRuleErrorMessage()
+        );
     }
 
     public function testValidateFalseRenderWidthSetLanguageViaOptions()
     {
-        $recaptcha = new reCaptcha();
         $responseBody = \json_encode([
             'success' => false,
             'error-codes' =>
-            [
-                0 => 'missing-input-response',
-                1 => 'invalid-input-secret'
-            ],
+                [
+                    0 => 'missing-input-response',
+                    1 => 'invalid-input-secret'
+                ],
         ]);
 
+        $recaptcha = new reCaptcha(
+            $this->getHttpClient('text/plain', $responseBody),
+            new HttpFactory(),
+            new HttpFactory(),
+        );
+
+
         $recaptcha->setOptions([
-            'httpClient' => $this->getHttpClient('text/plain', $responseBody),
             'language' => 'ru'
         ]);
 
@@ -160,12 +185,14 @@ class reCaptchaTest extends TestCase
 
         $captcha->validate();
         $captcha->baseHtml();
-        $this->assertEquals('Параметр ответа отсутствует., Секретный параметр является недопустимым или искаженным.', $captcha->getRuleErrorMessage());
+        $this->assertEquals(
+            'Параметр ответа отсутствует., Секретный параметр является недопустимым или искаженным.',
+            $captcha->getRuleErrorMessage()
+        );
     }
 
     public function testValidateFalseRenderWidthSetLanguageViaMethod()
     {
-        $recaptcha = new reCaptcha();
         $responseBody = \json_encode([
             'success' => false,
             'error-codes' =>
@@ -174,9 +201,12 @@ class reCaptchaTest extends TestCase
                 ],
         ]);
 
-        $recaptcha->setOptions([
-            'httpClient' => $this->getHttpClient('text/plain', $responseBody),
-        ]);
+
+        $recaptcha = new reCaptcha(
+            $this->getHttpClient('text/plain', $responseBody),
+            new HttpFactory(),
+            new HttpFactory(),
+        );
 
         $recaptcha->setLanguage('RU');
 
@@ -186,6 +216,9 @@ class reCaptchaTest extends TestCase
 
         $captcha->validate();
         $captcha->baseHtml();
-        $this->assertEquals('Секретный параметр является недопустимым или искаженным.', $captcha->getRuleErrorMessage());
+        $this->assertEquals(
+            'Секретный параметр является недопустимым или искаженным.',
+            $captcha->getRuleErrorMessage()
+        );
     }
 }
